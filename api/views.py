@@ -1,5 +1,88 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, get_object_or_404
+from .models import Article
+from .serializers import ArticleModelSerializer
+from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import APIView
 
 # Create your views here.
-def Index(request):
-    return HttpResponse("It is working!!!")
+
+# function implementation
+#@csrf_exempt # to allow POST data from clients without csrf token
+@api_view(['GET', 'POST']) # allowed request methods
+def article_list(request):
+    # get all articles in the database
+    if request.method == 'GET':  
+        articles = Article.objects.all()
+        # when serializing a queryset, add the attr many = true
+        serializer = ArticleModelSerializer(articles, many=True)
+        # return JsonResponse(serializer.data, safe=False) # won return JsonResponse, mark safe to false         
+        return Response(serializer.data) # browserable api
+    elif request.method == 'POST':
+        # data = JSONParser().parse(request)
+        serializer = ArticleModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# function implementation
+@api_view(['GET', 'PUT', 'DELETE'])  # allowed request methods
+def article_detail(request, pk):
+    # get specific article as per the id, if not available return 404
+    article = get_object_or_404(Article, id=pk)
+    if request.method == 'GET':
+        # get the serialized article data
+        serializer = ArticleModelSerializer(article)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        # data = JSONParser().parse(request)
+        serializer = ArticleModelSerializer(article, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        article.delete()
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+
+class ArticleListView(APIView):
+    def get(self, request):
+        articles = Article.objects.all()
+        serializer = ArticleModelSerializer(articles, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ArticleModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ArticleDetailView(APIView):
+    def get_object(self, id):
+        article = get_object_or_404(Article, id=id)
+        return article
+
+    def get(self, request, id):
+        article = self.get_object(id)
+        serializer = ArticleModelSerializer(article)
+        return Response(serializer.data)
+    
+    def put(self, request, id):
+        article = self.get_object(id)
+        serializer = ArticleModelSerializer(article, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        article = self.get_object(id)
+        article.delete()
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
