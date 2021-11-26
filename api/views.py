@@ -1,6 +1,8 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from .models import Article
+from django.contrib.auth.models import User
 from .serializers import ArticleModelSerializer
+from .serializers import UserModelSerializer
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
@@ -10,6 +12,8 @@ from rest_framework.decorators import APIView
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
@@ -165,6 +169,15 @@ class ArticleGenericViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixi
     serializer_class = ArticleModelSerializer
 
 
-class ArticleModalViewSet(viewsets.ModelViewSet):
+class ArticleModelViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
+    # serializer_class = ArticleModelSerializer() # this is an error, object not callable
     serializer_class = ArticleModelSerializer
+    # specify authentication class
+    authentication_classes = (TokenAuthentication, )
+    # when using IsAuthenticated, don't add DEFAULT_PERMISSION_CLASSES to settings
+    permission_classes = [IsAuthenticated]
+
+class UserModelViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserModelSerializer
