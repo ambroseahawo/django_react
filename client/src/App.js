@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
+import ArticleList from './components/ArticleList'
+import Form from './components/Form'
 
 const App = () => {
-  const [articles, setArticles] = useState(['one', 'two'])
+  const [articles, setArticles] = useState([])
+  const [editArticle, setEditArticle] = useState(null)
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/articles', {
@@ -15,19 +18,57 @@ const App = () => {
       .catch(error => console.log(error))
   }, [])
 
+  const editBtn = (article) =>{
+    setEditArticle(article)
+  }
+
+  const deleteBtn = (article) =>{
+    const new_articles = articles.filter(item => {
+      if (item.id === article.id) {
+        return false
+      }
+      return true
+    })
+
+    setArticles(new_articles)
+  }
+
+  const articleForm = () => {
+    setEditArticle({title: '', description: ''})
+  }
+
+  const updatedInformation = (article) => {
+    const new_article = articles.map(item => {
+      if (item.id === article.id){
+        return article
+      }
+      else {
+        return item
+      }
+    })
+
+    setArticles(new_article)
+  }
+
+  const newInformation = (article) => {
+    const new_articles = [...articles, article]
+    setArticles(new_articles)
+  }
+
   return (
     <div className="App">
-      <h1>Client-Side</h1>
+      <div className="row">
+        <div className="col">
+          <h1>Client-Side</h1><br />
+        </div>
+        <div className="col">
+          <button onClick={articleForm} className="btn btn-primary">Add article</button>
+        </div>
+      </div>
 
-      {articles.map(article => {
-        const {id, title, description} = article
-        return (
-          <div key={id}>
-            <h2>{title}</h2>
-            <p>{description}</p>
-          </div>
-        )
-      })}
+      <ArticleList articles={articles} editBtn={editBtn} deleteBtn={deleteBtn}/>
+      {editArticle ? <Form article={editArticle} updatedInformation={updatedInformation} newInformation={newInformation}/> : null}
+      
     </div>
   )
 }
