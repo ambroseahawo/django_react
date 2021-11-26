@@ -1,40 +1,64 @@
 export default class APIService {
 
-    static async UpdateArticle(article_id, body) {
+    static async UpdateArticle(article_id, body, token) {
 
         const resp = await fetch(`http://127.0.0.1:8000/api/articles/${article_id}/`, {
             'method': 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Token 5365599a52d9a85b1550661b81833c7495ef42b1'
+                'Authorization': `Token ${token}`
             },
             body: JSON.stringify(body)
         })
         return await resp.json();
     }
 
-    static async InsertArticle(body) {
+    static async InsertArticle(body, token) {
 
         const resp = await fetch(`http://127.0.0.1:8000/api/articles/`, {
             'method': 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Token 5365599a52d9a85b1550661b81833c7495ef42b1'
+                'Authorization': `Token ${token}`
             },
             body: JSON.stringify(body)
         })
         return await resp.json();
     }
 
-    static async DeleteArticle(article_id) {
+    static async DeleteArticle(article_id, token) {
 
         return fetch(`http://127.0.0.1:8000/api/articles/${article_id}/`, {
             'method': 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Token 5365599a52d9a85b1550661b81833c7495ef42b1'
+                'Authorization': `Token ${token}`
             },
         })
+    }
+
+    static async LoginUser(body) {
+
+        const resp = await fetch(`http://127.0.0.1:8000/auth/`, {
+            'method': 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        })
+        return await resp.json();
+    }
+
+    static async RegisterUser(body) {
+
+        const resp = await fetch(`http://127.0.0.1:8000/api/users/`, {
+            'method': 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        })
+        return await resp.json();
     }
 
 }

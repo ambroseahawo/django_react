@@ -1,12 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Route, Routes, BrowserRouter as Router } from 'react-router-dom'
+import {CookiesProvider} from 'react-cookie'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Login from './components/Login';
 import App from './App';
 import './index.css';
 
+const RouterFunc = () => {
+  return(
+    <CookiesProvider>
+      <Routes>
+        <Route exact path="/" element={<Login/>} />
+        <Route exact path="/articles" element={<App/>} />
+      </Routes>
+    </CookiesProvider>
+  )
+}
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router>
+      <RouterFunc />
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
