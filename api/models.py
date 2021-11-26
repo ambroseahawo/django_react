@@ -10,3 +10,6 @@ class Article(models.Model):
     # view item title on admin list view
     def __str__(self):
         return self.title
+    
+    class Meta:
+        ordering = ['-id']
