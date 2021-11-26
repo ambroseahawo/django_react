@@ -7,20 +7,22 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import APIView
+from rest_framework import generics
+from rest_framework import mixins
 
 # Create your views here.
 
 # function implementation
-#@csrf_exempt # to allow POST data from clients without csrf token
-@api_view(['GET', 'POST']) # allowed request methods
+# @csrf_exempt # to allow POST data from clients without csrf token
+@api_view(['GET', 'POST'])  # allowed request methods
 def article_list(request):
     # get all articles in the database
-    if request.method == 'GET':  
+    if request.method == 'GET':
         articles = Article.objects.all()
         # when serializing a queryset, add the attr many = true
         serializer = ArticleModelSerializer(articles, many=True)
-        # return JsonResponse(serializer.data, safe=False) # won return JsonResponse, mark safe to false         
-        return Response(serializer.data) # browserable api
+        # return JsonResponse(serializer.data, safe=False) # won return JsonResponse, mark safe to false
+        return Response(serializer.data)  # browserable api
     elif request.method == 'POST':
         # data = JSONParser().parse(request)
         serializer = ArticleModelSerializer(data=request.data)
@@ -49,7 +51,7 @@ def article_detail(request, pk):
         article.delete()
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
-
+# class implementation without mixins
 class ArticleListView(APIView):
     def get(self, request):
         articles = Article.objects.all()
@@ -73,7 +75,7 @@ class ArticleDetailView(APIView):
         article = self.get_object(id)
         serializer = ArticleModelSerializer(article)
         return Response(serializer.data)
-    
+
     def put(self, request, id):
         article = self.get_object(id)
         serializer = ArticleModelSerializer(article, data=request.data)
@@ -86,3 +88,37 @@ class ArticleDetailView(APIView):
         article = self.get_object(id)
         article.delete()
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+
+# class implementation with mixins
+class ArticleListViewMixin(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
+    queryset = Article.objects.all()
+    # ArticleListViewMixin should either include a `serializer_class` attribute, or override the `get_serializer_class()` method.
+    serializer_class = ArticleModelSerializer
+
+    # get queryset list
+    def get(self, request):
+        return self.list(request)
+    
+    # post data
+    def post(self, request):
+        return self.create(request)
+
+class ArticleDetailViewMixin(generics.GenericAPIView, mixins.RetrieveModelMixin, 
+                            mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Article.objects.all()
+    serializer_class = ArticleModelSerializer
+    # overides pk
+    lookup_field = 'id'
+
+    # get detail article
+    def get(self, request, id):
+        return self.retrieve(request, id=id)
+    
+    # update detail article
+    def put(self, request, id):
+        return self.update(request, id=id)
+
+    # delete detail article
+    def delete(self, request, id):
+        return self.destroy(request, id=id)
