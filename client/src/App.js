@@ -8,7 +8,7 @@ import './App.css'
 const App = () => {
   const [articles, setArticles] = useState([])
   const [editArticle, setEditArticle] = useState(null)
-  const [token, setToken, removeToken] = useCookies('loginToken')
+  const [token, removeToken] = useCookies('loginToken')
   const navigate = useNavigate()
 
   useEffect(() => {
