@@ -70,10 +70,10 @@ const App = () => {
   }
 
   return (
-    <div className="App">
+    <div className="">
       <div className="row">
         <div className="col">
-          <h1>Client-Side</h1><br />
+          <h1>Articles</h1><br />
         </div>
         <div className="col">
           <button onClick={articleForm} className="btn btn-primary">Add article</button>
